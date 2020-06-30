@@ -19,14 +19,8 @@
 "                      when contentAlign==top, >0 means scroll up,
 "                      default is `0`',
 " }
-if !exists('g:ZFPopupDefaultConfig')
-    let g:ZFPopupDefaultConfig = {}
-endif
-if !exists('g:ZFPopupDefaultWidth')
-    let g:ZFPopupDefaultWidth = 1.0/4
-endif
-if !exists('g:ZFPopupDefaultHeight')
-    let g:ZFPopupDefaultHeight = 5
+if !exists('g:ZFPopup_defaultConfig')
+    let g:ZFPopup_defaultConfig = {}
 endif
 
 " {
@@ -64,7 +58,7 @@ function! ZFPopupCreate(...)
                 \   'wrap' : 1,
                 \   'contentAlign' : 'top',
                 \   'contentOffset' : 0,
-                \ }, g:ZFPopupDefaultConfig), get(a:, 1, {}))
+                \ }, g:ZFPopup_defaultConfig), get(a:, 1, {}))
     let popupid = s:popupidNext()
     let frame = ZFPopupCalcFrame(config)
     let implState = g:ZFPopupImpl['create'](popupid, config, frame)
@@ -258,8 +252,6 @@ function! ZFPopupCalcFrame(config, ...)
 
     if ret['width'] > 0
         " nothing to do
-    elseif g:ZFPopupDefaultWidth > 0
-        let ret['width'] = g:ZFPopupDefaultWidth
     else
         let ret['width'] = 1.0/4
     endif
@@ -269,8 +261,6 @@ function! ZFPopupCalcFrame(config, ...)
 
     if ret['height'] > 0
         " nothing to do
-    elseif g:ZFPopupDefaultHeight > 0
-        let ret['height'] = g:ZFPopupDefaultHeight
     else
         let ret['height'] = 5
     endif

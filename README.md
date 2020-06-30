@@ -29,7 +29,7 @@ call ZFPopupClose(popupid)
 
     return popupid if success, or -1 if failed
 
-    config: (default config can be configured by `g:ZFPopupDefaultConfig`)
+    config: (default config can be configured by `g:ZFPopup_defaultConfig`)
 
     * `pos` : `left/right/top/bottom/cursor`,
         can combine as 'cursor|left|top',
@@ -38,7 +38,7 @@ call ZFPopupClose(popupid)
     * `width` / `height`
         * `[1, 9999)` : use fixed size
         * `(0.0, 1.0)` : use size relative to screen size
-        * others : use `g:ZFPopupDefaultWidth`
+        * others : use `1.0/4` and `5`
     * `x` / `y` : offset according to `pos`
     * `wrap` : `0` or `1`, whether `:h wrap` in popup window,
         default is `1`
