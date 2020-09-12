@@ -3,7 +3,7 @@ if !exists('*popup_create')
     finish
 endif
 
-function! s:create(popupid, config, frame)
+function! s:create(popupId, config, frame)
     " {
     "   'bufnr' : '',
     "   'winid' : '',
@@ -17,24 +17,24 @@ function! s:create(popupid, config, frame)
     return implState
 endfunction
 
-function! s:close(popupid, config, implState)
+function! s:close(popupId, config, implState)
     call popup_close(a:implState['winid'])
 endfunction
 
-function! s:show(popupid, config, implState)
+function! s:show(popupId, config, implState)
     call popup_show(a:implState['winid'])
-    call s:config(a:popupid, a:config, a:implState)
+    call s:config(a:popupId, a:config, a:implState)
 endfunction
 
-function! s:hide(popupid, config, implState)
+function! s:hide(popupId, config, implState)
     call popup_hide(a:implState['winid'])
 endfunction
 
-function! s:content(popupid, config, implState, content, contentOrig)
+function! s:content(popupId, config, implState, content, contentOrig)
     call popup_settext(a:implState['winid'], a:content)
 endfunction
 
-function! s:config(popupid, config, implState, frame)
+function! s:config(popupId, config, implState, frame)
     call popup_setoptions(a:implState['winid'], s:getOption(a:config, a:frame))
 endfunction
 

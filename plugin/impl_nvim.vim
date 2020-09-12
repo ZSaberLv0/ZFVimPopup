@@ -4,7 +4,7 @@ if !exists('*nvim_open_win')
 endif
 
 let s:winidInvalid = 0
-function! s:create(popupid, config, frame)
+function! s:create(popupId, config, frame)
     " {
     "   'bufnr' : '',
     "   'winid' : '',
@@ -20,29 +20,29 @@ function! s:create(popupid, config, frame)
     return implState
 endfunction
 
-function! s:close(popupid, config, implState)
-    call s:hide(a:popupid, a:config, a:implState)
+function! s:close(popupId, config, implState)
+    call s:hide(a:popupId, a:config, a:implState)
     execute ':bdelete! ' . a:implState['bufnr']
 endfunction
 
-function! s:show(popupid, config, implState)
+function! s:show(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
-        let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupid)['frame']))
+        let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
     endif
 endfunction
 
-function! s:hide(popupid, config, implState)
+function! s:hide(popupId, config, implState)
     if a:implState['winid'] != s:winidInvalid
         call nvim_win_close(a:implState['winid'], 1)
         let a:implState['winid'] = s:winidInvalid
     endif
 endfunction
 
-function! s:content(popupid, config, implState, content, contentOrig)
+function! s:content(popupId, config, implState, content, contentOrig)
     call nvim_buf_set_lines(a:implState['bufnr'], 0, -1, 1, a:content)
 endfunction
 
-function! s:config(popupid, config, implState, frame)
+function! s:config(popupId, config, implState, frame)
     call nvim_win_set_config(a:implState['winid'], s:getOption(a:config, a:frame))
 endfunction
 

@@ -24,12 +24,12 @@ if !exists('g:ZFPopup_defaultConfig')
 endif
 
 " {
-"   'create' : 'function(popupid, config, frame) that return implState, the implState must contain `bufnr`',
-"   'close' : 'function(popupid, config, implState)',
-"   'show' : 'function(popupid, config, implState)',
-"   'hide' : 'function(popupid, config, implState)',
-"   'content' : 'function(popupid, config, implState, content, contentOrig), change content',
-"   'config' : 'function(popupid, config, implState, config, frame), change config',
+"   'create' : 'function(popupId, config, frame) that return implState, the implState must contain `bufnr`',
+"   'close' : 'function(popupId, config, implState)',
+"   'show' : 'function(popupId, config, implState)',
+"   'hide' : 'function(popupId, config, implState)',
+"   'content' : 'function(popupId, config, implState, content, contentOrig), change content',
+"   'config' : 'function(popupId, config, implState, config, frame), change config',
 " }
 if !exists('g:ZFPopupImpl')
     let g:ZFPopupImpl = {}
@@ -59,13 +59,13 @@ function! ZFPopupCreate(...)
                 \   'contentAlign' : 'top',
                 \   'contentOffset' : 0,
                 \ }, g:ZFPopup_defaultConfig), get(a:, 1, {}))
-    let popupid = s:popupidNext()
+    let popupId = s:popupIdNext()
     let frame = ZFPopupCalcFrame(config)
-    let implState = g:ZFPopupImpl['create'](popupid, config, frame)
+    let implState = g:ZFPopupImpl['create'](popupId, config, frame)
     if empty(implState) || !exists("implState['bufnr']")
         return -1
     endif
-    let s:state[popupid] = {
+    let s:state[popupId] = {
                 \   'config' : config,
                 \   'content' : [],
                 \   'show' : 1,
@@ -74,16 +74,16 @@ function! ZFPopupCreate(...)
                 \   'redrawTaskId' : -1,
                 \ }
     call s:cursorEventCheckSetup()
-    return popupid
+    return popupId
 endfunction
 
-function! ZFPopupClose(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupClose(popupId)
+    if !exists('s:state[a:popupId]')
         return 0
     endif
-    let state = s:state[a:popupid]
-    unlet s:state[a:popupid]
-    call g:ZFPopupImpl['close'](a:popupid, state['config'], state['implState'])
+    let state = s:state[a:popupId]
+    unlet s:state[a:popupId]
+    call g:ZFPopupImpl['close'](a:popupId, state['config'], state['implState'])
     call s:cursorEventCheckSetup()
     if state['redrawTaskId'] != -1
         call timer_stop(state['redrawTaskId'])
@@ -91,101 +91,101 @@ function! ZFPopupClose(popupid)
     endif
 endfunction
 
-function! ZFPopupShow(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupShow(popupId)
+    if !exists('s:state[a:popupId]')
         return 0
     endif
-    let state = s:state[a:popupid]
-    call g:ZFPopupImpl['show'](a:popupid, state['config'], state['implState'])
+    let state = s:state[a:popupId]
+    call g:ZFPopupImpl['show'](a:popupId, state['config'], state['implState'])
     let state['show'] = 1
     call s:cursorEventCheckSetup()
 endfunction
 
-function! ZFPopupHide(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupHide(popupId)
+    if !exists('s:state[a:popupId]')
         return 0
     endif
-    let state = s:state[a:popupid]
-    call g:ZFPopupImpl['hide'](a:popupid, state['config'], state['implState'])
+    let state = s:state[a:popupId]
+    call g:ZFPopupImpl['hide'](a:popupId, state['config'], state['implState'])
     let state['show'] = 0
     call s:cursorEventCheckSetup()
 endfunction
 
-function! ZFPopupContent(popupid, ...)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupContent(popupId, ...)
+    if !exists('s:state[a:popupId]')
         return []
     endif
-    let state = s:state[a:popupid]
+    let state = s:state[a:popupId]
     if a:0 == 0
         return state['content']
     endif
     let state['content'] = a:1
     if state['redrawTaskId'] == -1
-        let state['redrawTaskId'] = timer_start(get(g:, 'ZFPopupRedrawDelay', 200), function('s:redrawCallback', [a:popupid]))
+        let state['redrawTaskId'] = timer_start(get(g:, 'ZFPopupRedrawDelay', 200), function('s:redrawCallback', [a:popupId]))
     endif
 endfunction
-function! s:redrawCallback(popupid, ...)
-    if !exists('s:state[a:popupid]')
+function! s:redrawCallback(popupId, ...)
+    if !exists('s:state[a:popupId]')
         return
     endif
-    let state = s:state[a:popupid]
+    let state = s:state[a:popupId]
     let state['redrawTaskId'] = -1
     call g:ZFPopupImpl['content'](
-                \ a:popupid,
+                \ a:popupId,
                 \ state['config'],
                 \ state['implState'],
-                \ ZF_PopupContentFix(a:popupid, state),
+                \ ZF_PopupContentFix(a:popupId, state),
                 \ state['content'])
 endfunction
 
-function! ZFPopupConfig(popupid, ...)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupConfig(popupId, ...)
+    if !exists('s:state[a:popupId]')
         return {}
     endif
-    let state = s:state[a:popupid]
+    let state = s:state[a:popupId]
     if a:0 == 0
         return state['config']
     endif
     let state['config'] = a:1
-    call g:ZFPopupImpl['config'](a:popupid, state['config'], state['implState'], state['frame'])
+    call g:ZFPopupImpl['config'](a:popupId, state['config'], state['implState'], state['frame'])
     call s:cursorEventCheckSetup()
 endfunction
 
-function! ZFPopupUpdate(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupUpdate(popupId)
+    if !exists('s:state[a:popupId]')
         return {}
     endif
-    let state = s:state[a:popupid]
+    let state = s:state[a:popupId]
     let state['frame'] = ZFPopupCalcFrame(state['config'])
-    call ZFPopupConfig(a:popupid, state['config'])
+    call ZFPopupConfig(a:popupId, state['config'])
 endfunction
 
 function! ZFPopupUpdateAll()
-    for popupid in keys(s:state)
-        call ZFPopupUpdate(popupid)
+    for popupId in keys(s:state)
+        call ZFPopupUpdate(popupId)
     endfor
 endfunction
 
-function! ZFPopupFrame(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupFrame(popupId)
+    if !exists('s:state[a:popupId]')
         return {}
     endif
-    return s:state[a:popupid]['frame']
+    return s:state[a:popupId]['frame']
 endfunction
 
-function! ZFPopupBufnr(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupBufnr(popupId)
+    if !exists('s:state[a:popupId]')
         return -1
     else
-        return s:state[a:popupid]['implState']['bufnr']
+        return s:state[a:popupId]['implState']['bufnr']
     endif
 endfunction
 
-function! ZFPopupState(popupid)
-    if !exists('s:state[a:popupid]')
+function! ZFPopupState(popupId)
+    if !exists('s:state[a:popupId]')
         return {}
     else
-        return s:state[a:popupid]
+        return s:state[a:popupId]
     endif
 endfunction
 
@@ -194,7 +194,7 @@ function! ZFPopupList()
 endfunction
 
 " {
-"   'popupid' : {
+"   'popupId' : {
 "     'config' : {},
 "     'content' : [],
 "     'show' : 0,
@@ -213,17 +213,20 @@ endfunction
 if !exists('s:state')
     let s:state = {}
 endif
-if !exists('s:popupid')
-    let s:popupid = 0
+if !exists('s:popupId')
+    let s:popupId = 0
 endif
-function! s:popupidNext()
+function! s:popupIdNext()
     while 1
-        let s:popupid += 1
-        if s:popupid >= 0 && !exists('s:state[s:popupid]')
-            break
+        let s:popupId += 1
+        if s:popupId <= 0
+            let s:popupId = 1
         endif
+        if exists('s:state[s:popupId]')
+            continue
+        endif
+        return s:popupId
     endwhile
-    return s:popupid
 endfunction
 
 function! s:getConfigValue(config, key)
@@ -337,9 +340,9 @@ augroup ZFPopupUpdateByEditorResize_augroup
 augroup END
 
 function! s:cursorEventUpdate()
-    for popupid in keys(s:state)
-        if s:state[popupid]['show'] && stridx(get(s:state[popupid]['config'], 'pos', ''), 'cursor') >= 0
-            call ZFPopupUpdate(popupid)
+    for popupId in keys(s:state)
+        if s:state[popupId]['show'] && stridx(get(s:state[popupId]['config'], 'pos', ''), 'cursor') >= 0
+            call ZFPopupUpdate(popupId)
         endif
     endfor
 endfunction

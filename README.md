@@ -16,18 +16,18 @@ Plugin 'ZSaberLv0/ZFVimJob' " optional, recommeded to combine with this job util
 # Usage
 
 ```
-let popupid = ZFPopupCreate({
+let popupId = ZFPopupCreate({
         \   'pos' : 'cursor|right|bottom',
         \ })
-call ZFPopupContent(popupid, ['line1', 'line2'])
-call ZFPopupClose(popupid)
+call ZFPopupContent(popupId, ['line1', 'line2'])
+call ZFPopupClose(popupId)
 ```
 
 # Functions
 
 * `ZFPopupCreate([config])`
 
-    return popupid if success, or -1 if failed
+    return popupId if success, or -1 if failed
 
     config: (default config can be configured by `g:ZFPopup_defaultConfig`)
 
@@ -43,16 +43,16 @@ call ZFPopupClose(popupid)
     * `wrap` : `0` or `1`, whether `:h wrap` in popup window,
         default is `1`
 
-* `ZFPopupClose(popupid)`
-* `ZFPopupShow(popupid)`
-* `ZFPopupHide(popupid)`
-* `ZFPopupContent(popupid [, content])`
+* `ZFPopupClose(popupId)`
+* `ZFPopupShow(popupId)`
+* `ZFPopupHide(popupId)`
+* `ZFPopupContent(popupId [, content])`
     * when `content` not specified, return current content (as List of strings)
     * when `content` specified, set the entire content of popup buffer
-* `ZFPopupConfig(popupid [, config])`
+* `ZFPopupConfig(popupId [, config])`
     * when `config` not specified, return popup's config
     * when `config` specified, change and update popup's config
-* `ZFPopupFrame(popupid)` : return popup's window frame, as `{'x':0,'y':0,'width':0,'height':0}`
-* `ZFPopupBufnr(popupid)` : return popup's `bufnr()`
-* `ZFPopupList()` : return a List of popupid
+* `ZFPopupFrame(popupId)` : return popup's window frame, as `{'x':0,'y':0,'width':0,'height':0}`
+* `ZFPopupBufnr(popupId)` : return popup's `bufnr()`
+* `ZFPopupList()` : return a List of popupId
 

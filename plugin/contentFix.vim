@@ -1,5 +1,5 @@
 
-function! ZF_PopupContentFix(popupid, state)
+function! ZF_PopupContentFix(popupId, state)
     if a:state['config']['wrap']
         return s:wrapContent(a:state['config'], a:state['content'], a:state['frame']['width'], a:state['frame']['height'])
     else
