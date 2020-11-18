@@ -50,7 +50,7 @@ function! s:getOption(config, frame)
                 \   'posinvert' : 0,
                 \   'fixed' : 1,
                 \   'tabpage' : -1,
-                \   'wrap' : 0,
+                \   'wrap' : a:config['wrap'],
                 \   'drag' : 0,
                 \   'resize' : 0,
                 \   'close' : 'none',

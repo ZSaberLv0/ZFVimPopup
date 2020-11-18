@@ -16,7 +16,6 @@ function! s:create(popupId, config, frame)
         execute ':bdelete! ' . implState['bufnr']
         return {}
     endif
-    call setwinvar(implState['winid'], '&wrap', 0)
     return implState
 endfunction
 
@@ -44,6 +43,7 @@ endfunction
 
 function! s:config(popupId, config, implState, frame)
     call nvim_win_set_config(a:implState['winid'], s:getOption(a:config, a:frame))
+    call setwinvar(a:implState['winid'], '&wrap', a:config['wrap'])
 endfunction
 
 function! s:getOption(config, frame)
