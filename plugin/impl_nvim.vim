@@ -32,7 +32,9 @@ endfunction
 
 function! s:hide(popupId, config, implState)
     if a:implState['winid'] != s:winidInvalid
-        call nvim_win_close(a:implState['winid'], 1)
+        try
+            silent! call nvim_win_close(a:implState['winid'], 1)
+        endtry
         let a:implState['winid'] = s:winidInvalid
     endif
 endfunction
