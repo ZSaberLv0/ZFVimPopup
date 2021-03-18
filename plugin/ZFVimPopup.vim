@@ -252,6 +252,11 @@ function! ZFPopupCalcFrame(config, ...)
                 \ }
     let screenWidth = &columns
     let screenHeight = &lines
+    if !has('nvim')
+        " neovim's floatwin can not hover above statusline
+        " modify to keep same behavior for vim
+        let screenHeight -= &cmdheight
+    endif
 
     if ret['width'] > 0
         " nothing to do
