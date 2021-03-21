@@ -229,15 +229,10 @@ function! s:popupIdNext()
     endwhile
 endfunction
 
-function! s:getConfigValue(config, key)
-    if type(a:config[a:key]) == type(function('function'))
-        let Fn = a:config[a:key]
-        return Fn()
-    else
-        return a:config[a:key]
-    endif
-endfunction
-" {
+" params:
+"   config
+"   cursor: [x,y]
+" return: {
 "   'x' : '',
 "   'y' : '',
 "   'width' : '',
@@ -252,11 +247,10 @@ function! ZFPopupCalcFrame(config, ...)
                 \ }
     let screenWidth = &columns
     let screenHeight = &lines
-    if !has('nvim')
-        " neovim's floatwin can not hover above statusline
-        " modify to keep same behavior for vim
-        let screenHeight -= &cmdheight
-    endif
+
+    " neovim's floatwin can not hover above statusline
+    " exclude cmdheight to to keep same behavior for both vim and neovim
+    let screenHeight -= &cmdheight
 
     if ret['width'] > 0
         " nothing to do
@@ -337,6 +331,14 @@ function! ZFPopupCalcFrame(config, ...)
     endif
 
     return ret
+endfunction
+function! s:getConfigValue(config, key)
+    if type(a:config[a:key]) == type(function('function'))
+        let Fn = a:config[a:key]
+        return Fn()
+    else
+        return a:config[a:key]
+    endif
 endfunction
 
 augroup ZFPopupUpdateByEditorResize_augroup
