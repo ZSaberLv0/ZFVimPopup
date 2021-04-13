@@ -51,6 +51,9 @@ function! s:show(popupId, config, implState)
     let a:implState['showing'] = 1
     let a:implState['ownerTab'] = tabpagenr()
     call s:verifyWin(a:implState)
+    call s:doShow(a:popupId, a:config, a:implState)
+endfunction
+function! s:doShow(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
         let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
     endif
@@ -59,6 +62,9 @@ endfunction
 function! s:hide(popupId, config, implState)
     let a:implState['showing'] = 0
     call s:verifyWin(a:implState)
+    call s:doHide(a:popupId, a:config, a:implState)
+endfunction
+function! s:doHide(popupId, config, implState)
     if a:implState['winid'] != s:winidInvalid
         call nvim_win_close(a:implState['winid'], 1)
         let a:implState['winid'] = s:winidInvalid
@@ -92,13 +98,13 @@ function! s:updateAllWinDelay(...)
         call s:verifyWin(implState)
         if (implState['winid'] != s:winidInvalid) != (implState['showing'] == 1)
             if implState['showing']
-                noautocmd call s:show(state['popupId'], state['config'], implState)
+                noautocmd call s:doShow(state['popupId'], state['config'], implState)
             else
-                noautocmd call s:hide(state['popupId'], state['config'], implState)
+                noautocmd call s:doHide(state['popupId'], state['config'], implState)
             endif
         elseif implState['ownerTab'] != tabpagenr()
-            noautocmd call s:hide(state['popupId'], state['config'], implState)
-            noautocmd call s:show(state['popupId'], state['config'], implState)
+            noautocmd call s:doHide(state['popupId'], state['config'], implState)
+            noautocmd call s:doShow(state['popupId'], state['config'], implState)
         endif
     endfor
 endfunction
