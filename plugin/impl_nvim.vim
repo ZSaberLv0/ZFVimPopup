@@ -14,7 +14,9 @@ if !exists('s:allState')
     let s:allState = {}
 endif
 
+let s:bufnrInvalid = 0
 let s:winidInvalid = 0
+
 function! s:create(popupId, config, frame)
     " {
     "   'bufnr' : '',
@@ -22,11 +24,18 @@ function! s:create(popupId, config, frame)
     "   'showing' : 0/1',
     "   'ownerTab' : '',
     " }
-    let implState = {}
-    let implState['bufnr'] = nvim_create_buf(0, 1)
-    let implState['winid'] = nvim_open_win(implState['bufnr'], 0, s:getOption(a:config, a:frame))
-    if implState['winid'] == s:winidInvalid
-        execute ':bdelete! ' . implState['bufnr']
+    let implState = {
+                \   'bufnr' : s:bufnrInvalid,
+                \   'winid' : s:winidInvalid,
+                \ }
+    try
+        silent! let implState['bufnr'] = nvim_create_buf(0, 1)
+        silent! let implState['winid'] = nvim_open_win(implState['bufnr'], 0, s:getOption(a:config, a:frame))
+    catch
+    endtry
+    if implState['bufnr'] == s:bufnrInvalid || implState['winid'] == s:winidInvalid
+        call s:ensureCloseBuf(implState['bufnr'])
+        call s:ensureCloseWin(implState['winid'])
         return {}
     endif
     let implState['showing'] = 1
@@ -44,7 +53,7 @@ function! s:close(popupId, config, implState)
     let a:implState['showing'] = 0
     call s:verifyWin(a:implState)
     call s:hide(a:popupId, a:config, a:implState)
-    execute ':bdelete! ' . a:implState['bufnr']
+    call s:ensureCloseBuf(a:implState['bufnr'])
 endfunction
 
 function! s:show(popupId, config, implState)
@@ -55,7 +64,10 @@ function! s:show(popupId, config, implState)
 endfunction
 function! s:doShow(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
-        let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+        try
+            silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+        catch
+        endtry
     endif
 endfunction
 
@@ -66,28 +78,37 @@ function! s:hide(popupId, config, implState)
 endfunction
 function! s:doHide(popupId, config, implState)
     if a:implState['winid'] != s:winidInvalid
-        call nvim_win_close(a:implState['winid'], 1)
+        call s:ensureCloseWin(a:implState['winid'])
         let a:implState['winid'] = s:winidInvalid
     endif
 endfunction
 
 function! s:content(popupId, config, implState, content, contentOrig)
-    call nvim_buf_set_lines(a:implState['bufnr'], 0, -1, 1, a:content)
+    try
+        silent! call nvim_buf_set_lines(a:implState['bufnr'], 0, -1, 1, a:content)
+    catch
+    endtry
 endfunction
 
 function! s:config(popupId, config, implState, frame)
     call s:verifyWin(a:implState)
     if a:implState['winid'] == s:winidInvalid
-        let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+        try
+            silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+        catch
+        endtry
     endif
-    call nvim_win_set_config(a:implState['winid'], s:getOption(a:config, a:frame))
-    call setwinvar(a:implState['winid'], '&wrap', a:config['wrap'])
+    try
+        silent! call nvim_win_set_config(a:implState['winid'], s:getOption(a:config, a:frame))
+        silent! call setwinvar(a:implState['winid'], '&wrap', a:config['wrap'])
+    catch
+    endtry
 endfunction
 
 function! s:verifyWin(implState)
     try
         call nvim_win_get_buf(a:implState['winid'])
-    catch /E5555:/
+    catch
         let a:implState['winid'] = s:winidInvalid
     endtry
 endfunction
@@ -133,6 +154,95 @@ function! s:getOption(config, frame)
                 \ }
     return option
 endfunction
+
+" ============================================================
+" https://github.com/neovim/neovim/issues/11387
+" https://github.com/neovim/neovim/issues/13628
+function! s:ensureCloseWin(winid)
+    if a:winid == s:winidInvalid
+        return
+    endif
+    try
+        call nvim_win_close(a:winid, 1)
+        if nvim_win_is_valid(a:winid)
+            call s:invalidWinAdd(a:winid)
+        endif
+    catch
+        call s:invalidWinAdd(a:winid)
+    endtry
+endfunction
+
+if !exists('g:invalidWinList')
+    let g:invalidWinList = []
+endif
+function! s:invalidWinAdd(winid)
+    if !has('timers')
+        return
+    endif
+    call add(g:invalidWinList, a:winid)
+    if len(g:invalidWinList) != 1
+        return
+    endif
+    call timer_start(500, function('s:invalidWinClear'))
+endfunction
+function! s:invalidWinClear(...)
+    let i = len(g:invalidWinList) - 1
+    while i >= 0
+        try
+            if nvim_win_is_valid(g:invalidWinList[i])
+                call s:invalidWinAdd(g:invalidWinList[i])
+            endif
+            silent! call nvim_win_close(g:invalidWinList[i], 1)
+            call remove(g:invalidWinList, i)
+        catch
+        endtry
+        let i -= 1
+    endwhile
+    if !empty(g:invalidWinList)
+        call timer_start(500, function('s:invalidWinClear'))
+    endif
+endfunction
+
+" ============================================================
+function! s:ensureCloseBuf(bufnr)
+    if a:bufnr == s:bufnrInvalid
+        return
+    endif
+    try
+        execute ':bdelete! ' . a:bufnr
+    catch
+        call s:invalidBufAdd(a:bufnr)
+    endtry
+endfunction
+
+if !exists('g:invalidBufList')
+    let g:invalidBufList = []
+endif
+function! s:invalidBufAdd(bufnr)
+    if !has('timers')
+        return
+    endif
+    call add(g:invalidBufList, a:bufnr)
+    if len(g:invalidBufList) != 1
+        return
+    endif
+    call timer_start(500, function('s:invalidBufClear'))
+endfunction
+function! s:invalidBufClear(...)
+    let i = len(g:invalidBufList) - 1
+    while i >= 0
+        try
+            silent! execute ':bdelete! ' . g:invalidBufList[i]
+            call remove(g:invalidBufList, i)
+        catch
+        endtry
+        let i -= 1
+    endwhile
+    if !empty(g:invalidBufList)
+        call timer_start(500, function('s:invalidBufClear'))
+    endif
+endfunction
+" ============================================================
 
 let g:ZFPopupImpl = {
             \   'create' : function('s:create'),
