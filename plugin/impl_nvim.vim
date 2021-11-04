@@ -148,6 +148,7 @@ function! s:tmpHideAll()
         call s:verifyWin(implState)
         noautocmd call s:doHide(state['popupId'], state['config'], implState)
     endfor
+    call s:closeAllFloatWin()
     if get(s:, 'tmpHideAllRestoreTaskId', -1) == -1 && has('timers')
         let s:tmpHideAllRestoreTaskId = timer_start(200, function('s:tmpHideAllRestore'))
     endif
@@ -155,6 +156,27 @@ endfunction
 function! s:tmpHideAllRestore(...)
     let s:tmpHideAllRestoreTaskId = -1
     call s:updateAllWinDelay()
+endfunction
+function! CloseAllFloatWin()
+    call s:closeAllFloatWin()
+endfunction
+function! s:closeAllFloatWin()
+    if !exists('*nvim_win_get_config')
+        return
+    endif
+    for i in range(1, winnr('$'))
+        let id = win_getid(i)
+        let config = nvim_win_get_config(id)
+        if empty(config) || empty(config['relative'])
+            continue
+        endif
+        " ignore border & button window & others
+        if !getwinvar(id, 'float', 0)
+            continue
+        endif
+
+        call s:ensureCloseWin(id)
+    endfor
 endfunction
 
 function! s:getOption(config, frame)
