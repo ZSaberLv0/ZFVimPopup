@@ -139,7 +139,23 @@ endfunction
 augroup ZF_Popup_nvim_fix
     autocmd!
     autocmd TabNew,TabClosed * call s:updateAllWin()
+    autocmd BufUnload * call s:tmpHideAll()
 augroup END
+
+function! s:tmpHideAll()
+    for state in values(s:allState)
+        let implState = state['implState']
+        call s:verifyWin(implState)
+        noautocmd call s:doHide(state['popupId'], state['config'], implState)
+    endfor
+    if get(s:, 'tmpHideAllRestoreTaskId', -1) == -1 && has('timers')
+        let s:tmpHideAllRestoreTaskId = timer_start(200, function('s:tmpHideAllRestore'))
+    endif
+endfunction
+function! s:tmpHideAllRestore(...)
+    let s:tmpHideAllRestoreTaskId = -1
+    call s:updateAllWinDelay()
+endfunction
 
 function! s:getOption(config, frame)
     let option = {
