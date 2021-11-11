@@ -157,9 +157,6 @@ function! s:tmpHideAllRestore(...)
     let s:tmpHideAllRestoreTaskId = -1
     call s:updateAllWinDelay()
 endfunction
-function! CloseAllFloatWin()
-    call s:closeAllFloatWin()
-endfunction
 function! s:closeAllFloatWin()
     if !exists('*nvim_win_get_config')
         return
