@@ -139,7 +139,7 @@ endfunction
 augroup ZF_Popup_nvim_fix
     autocmd!
     autocmd TabNew,TabClosed * call s:updateAllWin()
-    autocmd BufUnload * call s:tmpHideAll()
+    autocmd BufModifiedSet,BufLeave,BufUnload,TabLeave * call s:tmpHideAll()
 augroup END
 
 function! s:tmpHideAll()
