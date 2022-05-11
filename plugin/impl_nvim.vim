@@ -66,6 +66,7 @@ function! s:doShow(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
         try
             silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+            call setwinvar(a:implState['winid'], 'ZFPopupWin', 1)
         catch
         endtry
     endif
@@ -167,8 +168,7 @@ function! s:closeAllFloatWin()
         if empty(config) || empty(config['relative'])
             continue
         endif
-        " ignore border & button window & others
-        if !getwinvar(id, 'float', 0)
+        if !getwinvar(id, 'ZFPopupWin', 0)
             continue
         endif
 
