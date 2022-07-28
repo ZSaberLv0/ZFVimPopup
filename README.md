@@ -4,6 +4,16 @@ util to show popup for vim8 and neovim
 if you like my work, [check here](https://github.com/ZSaberLv0?utf8=%E2%9C%93&tab=repositories&q=ZFVim) for a list of my vim plugins,
 or [buy me a coffee](https://github.com/ZSaberLv0/ZSaberLv0)
 
+# Requirement
+
+* vim
+    * `exists('*popup_create')`
+* neovim
+    * `exists('*nvim_open_win')`
+    * `0.7.0` or above, [see this](https://github.com/neovim/neovim/issues/11440)
+        * you may `let g:ZFPopup_nvim_enableOnOldVer=1` to bypass the check,
+            but may cause `E5601: Cannot close window, only floating window would remain`
+
 
 # Install
 

@@ -3,6 +3,11 @@ if !exists('*nvim_open_win')
     finish
 endif
 
+" https://github.com/neovim/neovim/issues/11440
+if has('nvim') && !has('nvim-0.7') && !get(g:, 'ZFPopup_nvim_enableOnOldVer', 0)
+    finish
+endif
+
 " {
 "   popupId : {
 "     'popupId' : '',
