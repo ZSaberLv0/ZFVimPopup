@@ -27,15 +27,18 @@ Plugin 'ZSaberLv0/ZFVimJob' " optional, recommeded to combine with this job util
 # Usage
 
 ```
-let popupId = ZFPopupCreate({
-        \   'pos' : 'cursor|right|bottom',
-        \ })
-call ZFPopupContent(popupId, ['line1', 'line2'])
-call ZFPopupClose(popupId)
+if ZFPopupAvailable()
+    let popupId = ZFPopupCreate({
+            \   'pos' : 'cursor|right|bottom',
+            \ })
+    call ZFPopupContent(popupId, ['line1', 'line2'])
+    call ZFPopupClose(popupId)
+endif
 ```
 
 # Functions
 
+* `ZFPopupAvailable()`
 * `ZFPopupCreate([config])`
 
     return popupId if success, or -1 if failed
