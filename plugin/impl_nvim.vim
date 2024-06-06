@@ -36,6 +36,7 @@ function! s:create(popupId, config, frame)
     try
         silent! let implState['bufnr'] = nvim_create_buf(0, 1)
         silent! let implState['winid'] = nvim_open_win(implState['bufnr'], 0, s:getOption(a:config, a:frame))
+        call s:initWin(implState, a:config)
     catch
     endtry
     if implState['bufnr'] == s:bufnrInvalid || implState['winid'] == s:winidInvalid
@@ -71,6 +72,7 @@ function! s:doShow(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
         try
             silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+            call s:initWin(a:implState, a:config)
             call setwinvar(a:implState['winid'], 'ZFPopupWin', 1)
         catch
         endtry
@@ -101,6 +103,7 @@ function! s:config(popupId, config, implState, frame)
     if a:implState['winid'] == s:winidInvalid
         try
             silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+            call s:initWin(a:implState, a:config)
         catch
         endtry
     endif
@@ -109,6 +112,10 @@ function! s:config(popupId, config, implState, frame)
         silent! call setwinvar(a:implState['winid'], '&wrap', a:config['wrap'])
     catch
     endtry
+endfunction
+
+function! s:initWin(implState, config)
+    silent! call setwinvar(a:implState['winid'], '&winhl', 'Normal:Pmenu')
 endfunction
 
 function! s:verifyWin(implState)
