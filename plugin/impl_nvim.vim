@@ -36,7 +36,9 @@ function! s:create(popupId, config, frame)
     try
         silent! let implState['bufnr'] = nvim_create_buf(0, 1)
         silent! let implState['winid'] = nvim_open_win(implState['bufnr'], 0, s:getOption(a:config, a:frame))
-        call s:initWin(implState, a:config)
+        if implState['winid'] != s:winidInvalid
+            call s:initWin(implState, a:config)
+        endif
     catch
     endtry
     if implState['bufnr'] == s:bufnrInvalid || implState['winid'] == s:winidInvalid
@@ -72,8 +74,10 @@ function! s:doShow(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
         try
             silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
-            call s:initWin(a:implState, a:config)
-            call setwinvar(a:implState['winid'], 'ZFPopupWin', 1)
+            if a:implState['winid'] != s:winidInvalid
+                call s:initWin(a:implState, a:config)
+                call setwinvar(a:implState['winid'], 'ZFPopupWin', 1)
+            endif
         catch
         endtry
     endif
@@ -103,7 +107,9 @@ function! s:config(popupId, config, implState, frame)
     if a:implState['winid'] == s:winidInvalid
         try
             silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
-            call s:initWin(a:implState, a:config)
+            if a:implState['winid'] != s:winidInvalid
+                call s:initWin(a:implState, a:config)
+            endif
         catch
         endtry
     endif
