@@ -23,7 +23,12 @@ endfunction
 
 function! s:show(popupId, config, implState)
     call popup_show(a:implState['winid'])
-    call s:config(a:popupId, a:config, a:implState)
+    call s:config(a:popupId, a:config, a:implState, get(s:, 'frameSaved', {
+                \   'x' : 1,
+                \   'y' : 1,
+                \   'width' : 1,
+                \   'height' : 1,
+                \ }))
 endfunction
 
 function! s:hide(popupId, config, implState)
@@ -35,6 +40,7 @@ function! s:content(popupId, config, implState, content, contentOrig)
 endfunction
 
 function! s:config(popupId, config, implState, frame)
+    let s:frameSaved = a:frame
     call popup_setoptions(a:implState['winid'], s:getOption(a:config, a:frame))
 endfunction
 
