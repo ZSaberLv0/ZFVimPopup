@@ -1,13 +1,15 @@
 
-if !exists('##WinScrolled')
+if get(g:, 'ZFPopup_autoHide', 500) <= 0
             \ || !exists('*timer_start')
-            \ || get(g:, 'ZFPopup_autoHide', 500) <= 0
     finish
 endif
 
 augroup ZF_PopupAutoHide_augroup
     autocmd!
-    autocmd CursorMoved,VimResized,WinScrolled * call ZF_PopupAutoHide_update()
+    autocmd CursorMoved,VimResized * call ZF_PopupAutoHide_update()
+    if exists('##WinScrolled')
+        autocmd WinScrolled * call ZF_PopupAutoHide_update()
+    endif
 augroup END
 
 function! ZF_PopupAutoHide_updateAction(...)
