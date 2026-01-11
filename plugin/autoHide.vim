@@ -16,7 +16,8 @@ function! ZF_PopupAutoHide_updateAction(...)
     let s:updateTaskId = -1
     for popupId in ZFPopupList()
         let state = ZFPopupState(popupId)
-        if state['show']
+        if state['showing']
+            let state['tmpHide'] = 0
             call ZFPopupShow(popupId)
         endif
     endfor
@@ -27,9 +28,10 @@ function! ZF_PopupAutoHide_update()
     else
         for popupId in ZFPopupList()
             let state = ZFPopupState(popupId)
-            if state['show']
+            if state['showing']
                 call ZFPopupHide(popupId)
-                let state['show'] = 1
+                let state['showing'] = 1
+                let state['tmpHide'] = 1
             endif
         endfor
     endif

@@ -68,7 +68,8 @@ function! ZFPopupCreate(...)
     let s:state[popupId] = {
                 \   'config' : config,
                 \   'content' : [],
-                \   'show' : 1,
+                \   'showing' : 1,
+                \   'tmpHide' : 0,
                 \   'frame' : frame,
                 \   'implState' : implState,
                 \   'redrawTaskId' : -1,
@@ -96,9 +97,11 @@ function! ZFPopupShow(popupId)
         return 0
     endif
     let state = s:state[a:popupId]
-    call g:ZFPopupImpl['show'](a:popupId, state['config'], state['implState'])
-    let state['show'] = 1
-    call s:cursorEventCheckSetup()
+    let state['showing'] = 1
+    if !state['tmpHide']
+        call g:ZFPopupImpl['show'](a:popupId, state['config'], state['implState'])
+        call s:cursorEventCheckSetup()
+    endif
 endfunction
 
 function! ZFPopupHide(popupId)
@@ -106,8 +109,8 @@ function! ZFPopupHide(popupId)
         return 0
     endif
     let state = s:state[a:popupId]
+    let state['showing'] = 0
     call g:ZFPopupImpl['hide'](a:popupId, state['config'], state['implState'])
-    let state['show'] = 0
     call s:cursorEventCheckSetup()
 endfunction
 
@@ -197,7 +200,8 @@ endfunction
 "   'popupId' : {
 "     'config' : {},
 "     'content' : [],
-"     'show' : 0,
+"     'showing' : 0,
+"     'tmpHide' : 0,
 "     'frame' : { // fixed calculated frame
 "       'x' : '',
 "       'y' : '',
@@ -348,7 +352,7 @@ augroup END
 
 function! s:cursorEventUpdate()
     for popupId in keys(s:state)
-        if s:state[popupId]['show'] && stridx(get(s:state[popupId]['config'], 'pos', ''), 'cursor') >= 0
+        if s:state[popupId]['showing'] && !s:state[popupId]['tmpHide'] && stridx(get(s:state[popupId]['config'], 'pos', ''), 'cursor') >= 0
             call ZFPopupUpdate(popupId)
         endif
     endfor
@@ -356,7 +360,7 @@ endfunction
 function! s:cursorEventCheckSetup()
     let exist = 0
     for state in values(s:state)
-        if state['show'] && stridx(get(state['config'], 'pos', ''), 'cursor') >= 0
+        if state['showing'] && !state['tmpHide'] && stridx(get(state['config'], 'pos', ''), 'cursor') >= 0
             let exist = 1
             break
         endif
