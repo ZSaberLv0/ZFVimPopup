@@ -203,6 +203,7 @@ function! s:getOption(config, frame)
                 \   'relative' : 'editor',
                 \   'anchor' : 'NW',
                 \   'focusable' : 0,
+                \   'noautocmd' : 1,
                 \   'style' : 'minimal',
                 \ }
     return option
