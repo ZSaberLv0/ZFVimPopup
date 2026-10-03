@@ -35,7 +35,7 @@ function! s:create(popupId, config, frame)
                 \ }
     try
         silent! let implState['bufnr'] = nvim_create_buf(0, 1)
-        silent! let implState['winid'] = nvim_open_win(implState['bufnr'], 0, s:getOption(a:config, a:frame))
+        silent! let implState['winid'] = nvim_open_win(implState['bufnr'], 0, s:getOptionForCreate(a:config, a:frame))
         if implState['winid'] != s:winidInvalid
             call s:initWin(implState, a:config)
         endif
@@ -73,7 +73,7 @@ endfunction
 function! s:doShow(popupId, config, implState)
     if a:implState['winid'] == s:winidInvalid
         try
-            silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+            silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOptionForCreate(a:config, ZFPopupState(a:popupId)['frame']))
             if a:implState['winid'] != s:winidInvalid
                 call s:initWin(a:implState, a:config)
                 call setwinvar(a:implState['winid'], 'ZFPopupWin', 1)
@@ -106,7 +106,7 @@ function! s:config(popupId, config, implState, frame)
     call s:verifyWin(a:implState)
     if a:implState['winid'] == s:winidInvalid
         try
-            silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOption(a:config, ZFPopupState(a:popupId)['frame']))
+            silent! let a:implState['winid'] = nvim_open_win(a:implState['bufnr'], 0, s:getOptionForCreate(a:config, ZFPopupState(a:popupId)['frame']))
             if a:implState['winid'] != s:winidInvalid
                 call s:initWin(a:implState, a:config)
             endif
@@ -114,7 +114,7 @@ function! s:config(popupId, config, implState, frame)
         endtry
     endif
     try
-        silent! call nvim_win_set_config(a:implState['winid'], s:getOption(a:config, a:frame))
+        silent! call nvim_win_set_config(a:implState['winid'], s:getOptionForUpdate(a:config, a:frame))
         silent! call setwinvar(a:implState['winid'], '&wrap', a:config['wrap'])
     catch
     endtry
@@ -194,7 +194,12 @@ function! s:closeAllFloatWin()
     endfor
 endfunction
 
-function! s:getOption(config, frame)
+function! s:getOptionForCreate(config, frame)
+    let option = s:getOptionForUpdate(a:config, a:frame)
+    let option['noautocmd'] = 1
+    return option
+endfunction
+function! s:getOptionForUpdate(config, frame)
     let option = {
                 \   'col' : a:frame['x'] - 1,
                 \   'row' : a:frame['y'] - 1,
@@ -203,7 +208,6 @@ function! s:getOption(config, frame)
                 \   'relative' : 'editor',
                 \   'anchor' : 'NW',
                 \   'focusable' : 0,
-                \   'noautocmd' : 1,
                 \   'style' : 'minimal',
                 \ }
     return option
