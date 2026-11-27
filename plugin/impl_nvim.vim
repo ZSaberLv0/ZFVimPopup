@@ -209,6 +209,7 @@ function! s:getOptionForUpdate(config, frame)
                 \   'anchor' : 'NW',
                 \   'focusable' : 0,
                 \   'style' : 'minimal',
+                \   'mouse' : 0,
                 \ }
     return option
 endfunction
